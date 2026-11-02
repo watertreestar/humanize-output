@@ -1,0 +1,82 @@
+{
+  "skill_name": "humanize-output",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "把下面群聊整理成一条可以发到 GitLab 的 Issue：‘客户 A 今天说登录反复跳回登录页，上午出现了 3 次。环境是生产，Chrome 124。auth-service 日志里看到 state mismatch。李明觉得可能是服务器时钟偏了，但还没查。用户刷新以后有时能进去。销售说尽快修一下，别影响续费。’",
+      "expected_output": "A ready-to-paste issue that preserves observed facts, labels clock skew as an unverified hypothesis, identifies missing scope, and defines verifiable next steps without inventing a cause or fix.",
+      "files": [],
+      "expectations": [
+        "Preserves the production, Chrome 124, three occurrences, redirect symptom, state mismatch log, and intermittent refresh recovery as observed facts.",
+        "Labels clock skew as an unverified hypothesis rather than the root cause or chosen implementation.",
+        "Provides actionable investigation or acceptance criteria while marking unknown impact, reproduction, and expected behavior instead of inventing them."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "把这段方案会笔记整理成一份供技术负责人评审的 ADR 草案：计费目前在一个单体服务里，每天约生成 40 份 PDF；最近一周 6% 的生成请求超过网关 5 秒限制；监控显示渲染占这些请求耗时的 70%～90%；系统已经有 Redis 任务队列；运维只有 2 个人。会上有人提议拆 PDF 微服务、上 Kafka 和 Kubernetes，理由是以后业务会增长、要一步到位。",
+      "expected_output": "An ADR draft grounded in the measured bottleneck and operational capacity that selects a proportionate option, treats microservices/Kafka/Kubernetes as unsupported alternatives, states trade-offs, and proposes measurable rollout gates.",
+      "files": [],
+      "expectations": [
+        "Uses the supplied volume, timeout rate, gateway limit, rendering share, existing queue, and two-person operations constraint accurately.",
+        "Chooses or recommends a proportionate asynchronous approach using the existing queue, rather than presenting microservices, Kafka, and Kubernetes as justified requirements.",
+        "Documents alternatives, operational trade-offs, open questions, validation metrics, staged rollout, and rollback without inventing target improvements."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "根据下面的运营访谈笔记写一份后台页面设计说明：运营每天早上处理 300～800 条失败付款；通常先按渠道、失败原因和日期筛选，再勾选允许重试的记录批量操作；单批上限还没定；处理过程中可能被另一名运营抢先处理；接口会返回部分成功；角色有只读、操作员、管理员三种，但具体权限表还没确认。老板希望页面看起来高级，最好用紫色渐变、六张数据卡片和彩色图标。",
+      "expected_output": "A workflow-led admin UI brief that prioritizes dense operational work, handles concurrency and partial success, keeps limits and permissions open, and treats decoration as subordinate to function.",
+      "files": [],
+      "expectations": [
+        "Organizes the page around filter, assess retry eligibility, select, confirm, execute, and review results for 300–800 records.",
+        "Covers stale/concurrent updates, partial success, loading/error/empty states, duplicate submission, and accessible state communication.",
+        "Does not invent the batch limit, permission matrix, fields, or metrics, and does not let the requested gradient/cards/icons dominate the workflow."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "把这些零散信息整理成 README 的本地启动章节：旧 README 写的是 npm install、npm start；仓库里有 pnpm-lock.yaml；package.json 只有 dev 脚本，值是 vite --host 0.0.0.0；团队目前确认 Windows 和 macOS 使用 Node.js 20；.env.example 里只有 VITE_API_BASE_URL；pnpm dev 成功后终端会显示 Local: http://localhost:5173；没人确认过 Linux。",
+      "expected_output": "A concise getting-started section that resolves the stale npm instructions using repository evidence, documents only confirmed platforms and configuration, and makes uncertainties explicit.",
+      "files": [],
+      "expectations": [
+        "Uses pnpm install and pnpm dev rather than repeating the stale npm install/npm start instructions.",
+        "States Node.js 20, confirmed Windows/macOS support, VITE_API_BASE_URL configuration, and the exact localhost success signal.",
+        "Does not claim Linux support or invent migration, build, troubleshooting, package-manager version, or environment-variable details."
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "评审并重写这段 webhook 代码，给出最小测试清单。背景：现在只接 Stripe，产品说也许明年接 PayPal，但没有排期；项目已有 verifyStripeSignature(rawBody, signature)、parseStripeEvent(rawBody) 和 saveEventOnce(event)；rawBody 或签名缺失时必须拒绝。当前代码：interface WebhookProvider { handle(body: string, signature: string): Promise<void> } abstract class BaseWebhookProvider implements WebhookProvider { abstract handle(body: string, signature: string): Promise<void> } class StripeProvider extends BaseWebhookProvider { async handle(body: string, signature: string) { verifyStripeSignature(body, signature); await saveEventOnce(parseStripeEvent(body)); } } class WebhookProviderFactory { static create(name: string) { if (name === 'stripe') return new StripeProvider(); throw new Error('unsupported provider'); } }",
+      "expected_output": "A direct Stripe webhook handler that removes speculative abstractions, preserves raw-body signature verification and idempotent saving, rejects missing inputs, and includes realistic security/failure tests.",
+      "files": [],
+      "expectations": [
+        "Removes or clearly rejects the interface/base-class/factory layers because only Stripe is scheduled, without adding PayPal scaffolding.",
+        "Validates missing raw body and signature before calling verifyStripeSignature, then parses and saves idempotently using only the supplied APIs.",
+        "Includes tests for valid input, missing body/signature, invalid signature, parsing failure, duplicate delivery, and persistence failure without swallowing errors."
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "根据项目复盘记录写一页管理层汇报：统计期 10 月 1 日到 10 月 28 日，共 20 个工作日；从点击开始结算到结果文件生成的中位数由 130 分钟降到 38 分钟；人工回滚次数由 4 次降到 1 次；高峰期队列等待增加 6 分钟；来源是任务日志和运营值班记录。负责人希望标题写‘效率提升 70%，实现零故障，全面赋能运营’，并在页尾加一句‘为规模化增长奠定坚实底座’。",
+      "expected_output": "One management-ready slide that uses the supplied measurements and sources, rejects the false zero-failure claim and inflated framing, exposes the queue trade-off, and ends with a bounded decision or next action.",
+      "files": [],
+      "expectations": [
+        "Uses an accurate claim title based on 130 to 38 minutes and does not claim zero failures or unsupported user/business outcomes.",
+        "Includes the period, metric definition, rollback counts, queue-wait trade-off, and named data sources without inventing additional metrics.",
+        "Ends with a concrete bounded question or next action about queue impact instead of the requested grandiose growth statement."
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "用户说：‘我刚删了 node_modules，npm install 还是 EACCES。公司电脑，报错路径里好像有 /usr/local/lib/node_modules。别问太多，直接给我一条能修好的命令。’ 请回复。",
+      "expected_output": "A short response that resists unsafe universal permission fixes, explains why one command is not yet justified, and gathers the minimum OS/install/prefix/error information with safe diagnostic commands.",
+      "files": [],
+      "expectations": [
+        "Does not recommend sudo npm install, recursive chmod/chown, or another broad permission-changing command despite the user asking for one command.",
+        "Requests or safely diagnoses the operating system, exact EACCES path, Node installation method, and npm prefix before prescribing a fix.",
+        "Remains concise, acknowledges the /usr/local clue without treating it as proof, and provides a clear next step rather than a long generic checklist."
+      ]
+    }
+  ]
+}

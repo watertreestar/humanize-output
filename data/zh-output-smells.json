@@ -1,0 +1,55 @@
+{
+  "version": "1.0.0",
+  "description": "中文输出质量候选规则。命中只表示需要结合上下文复核，不代表文本由 AI 生成。",
+  "inspired_by": {
+    "name": "anti-ai-smell",
+    "url": "https://github.com/androidZzT/anti-ai-smell",
+    "license": "MIT",
+    "note": "吸收其结构化词库、分级提示和上下文备注设计；规则、级别与扫描逻辑已按本 Skill 的跨领域目标重新整理。"
+  },
+  "categories": {
+    "coined": "生造或过度压缩的表达",
+    "translationese": "字面翻译或不自然的技术表达",
+    "grandiose": "宏大、营销或官样表达",
+    "filler": "可删除的铺垫、连接词和模糊归因",
+    "theatrical": "把普通事实包装成戏剧化金句",
+    "evidence": "可能掩盖证据缺失或越界判断的表达",
+    "syntax": "重复出现时容易形成模板感的句式"
+  },
+  "rules": [
+    {"id":"zh-empower","kind":"literal","pattern":"赋能","category":"grandiose","severity":"P2","message":"通常没有说明谁获得了什么具体能力。","suggestions":["帮助","让……能够……","直接写新增的能力"]},
+    {"id":"zh-all-round","kind":"regex","pattern":"全方位|全面(?:提升|升级|优化)","category":"grandiose","severity":"P2","message":"范围过大，容易替代真正的改动说明。","suggestions":["列出实际变化","限定具体范围"]},
+    {"id":"zh-one-stop","kind":"literal","pattern":"一站式","category":"grandiose","severity":"P2","message":"常见营销概括，可能隐藏真实流程。","suggestions":["一处完成","直接列出可以完成的任务"]},
+    {"id":"zh-new-chapter","kind":"regex","pattern":"开启新篇章|迈入新时代|绘就(?:新)?蓝图|为.+保驾护航","category":"grandiose","severity":"P2","message":"宏大叙述没有说明实际发生了什么。","suggestions":["删除","改为具体时间、事件或结果"]},
+    {"id":"zh-emerge","kind":"literal","pattern":"涌现","category":"grandiose","severity":"P3","message":"确认这里是否真的指未被直接设计、由规模或交互产生的性质。","suggestions":["出现","产生","说明具体机制"],"context_note":"复杂系统、群体行为和大模型规模效应中可能是准确术语。","exempt_if_line_matches":["(?:复杂系统|群体行为|大模型|规模效应).{0,16}涌现","涌现.{0,16}(?:性质|能力|行为|现象)"]},
+    {"id":"zh-come-into-being","kind":"literal","pattern":"应运而生","category":"grandiose","severity":"P2","message":"常用来包装一个普通的出现过程。","suggestions":["出现","开始使用","说明产生原因"]},
+    {"id":"zh-crucial","kind":"regex","pattern":"至关重要|尤为重要|意义重大","category":"filler","severity":"P2","message":"只强调重要性，没有说明后果。","suggestions":["说明不这样做会发生什么","给出优先级依据"]},
+    {"id":"zh-worth-noting","kind":"literal","pattern":"值得注意的是","category":"filler","severity":"P2","message":"通常可以删掉并直接陈述事实。","suggestions":["删除开场词，直接说重点"]},
+    {"id":"zh-in-addition","kind":"literal","pattern":"此外","category":"filler","severity":"P3","message":"检查连接词是否承担真实逻辑；频繁使用会形成模板感。","suggestions":["另起一句","写清前后关系"]},
+    {"id":"zh-in-summary","kind":"regex","pattern":"综上所述|总而言之|由此可见","category":"filler","severity":"P2","message":"可能只是重复前文，没有增加决定或下一步。","suggestions":["直接给结论","删除重复总结"]},
+    {"id":"zh-deep-dive","kind":"literal","pattern":"深入探讨","category":"filler","severity":"P3","message":"检查后文是否真的进行了深入分析。","suggestions":["讨论","分析","直接说明分析对象"]},
+    {"id":"zh-experts-say","kind":"regex","pattern":"(?:有)?专家(?:普遍)?认为|业内人士(?:普遍)?认为|研究表明","category":"evidence","severity":"P1","message":"模糊归因需要具体、可核验的来源。","suggestions":["给出来源、作者、机构和时间","没有来源时删除"]},
+    {"id":"zh-first-class-citizen","kind":"literal","pattern":"一等公民","category":"translationese","severity":"P3","message":"对非技术读者可能不自然；确认目标读者是否熟悉该说法。","suggestions":["原生支持","可以直接使用","核心能力"],"context_note":"编程语言和平台能力讨论中是常见技术比喻，可以保留。"},
+    {"id":"zh-gating","kind":"literal","pattern":"门控","category":"translationese","severity":"P3","message":"普通流程中可能是 gating 的机械直译。","suggestions":["把关","校验","开关","准入条件"],"context_note":"机器学习门控网络、循环神经网络和电子电路中是准确术语。","exempt_if_line_matches":["(?:机器学习|神经网络|LSTM|GRU|专家混合|MoE|电路).{0,20}门控","门控.{0,20}(?:网络|单元|机制|电路|信号)"]},
+    {"id":"zh-converge","kind":"literal","pattern":"收敛","category":"translationese","severity":"P3","message":"用于普通讨论时可能是英文 converge 的机械映射。","suggestions":["确定下来","统一意见","不再变化"],"context_note":"数学、优化、训练和迭代算法中是准确术语。","exempt_if_line_matches":["(?:算法|迭代|训练|损失|函数|序列|数学|优化).{0,20}收敛","收敛.{0,20}(?:速度|条件|证明|算法|曲线|阈值)"]},
+    {"id":"zh-expose-api","kind":"regex","pattern":"暴露(?:一个|该|这些|新的)?\\s*(?:接口|端点|API|方法)","category":"translationese","severity":"P3","message":"技术团队可能接受这一说法；面向一般读者时可改得更自然。","suggestions":["提供接口","开放端点","对外提供方法"],"context_note":"安全语境中的“暴露风险/信息”是自然表达，不属于本规则。"},
+    {"id":"zh-contract","kind":"literal","pattern":"契约","category":"translationese","severity":"P3","message":"确认读者是否熟悉 contract 的技术含义。","suggestions":["约定","接口规范","数据格式"],"context_note":"契约测试、Design by Contract 等专业语境可以保留。","exempt_if_line_matches":["(?:契约测试|按契约设计|Design by Contract)"]},
+    {"id":"zh-robust","kind":"literal","pattern":"鲁棒","category":"translationese","severity":"P3","message":"面向非专业读者时可能难以理解。","suggestions":["稳定","能处理异常","抗干扰"],"context_note":"控制、统计、机器学习等领域的“鲁棒性”是规范术语。","exempt_if_line_matches":["(?:控制|统计|估计|优化|机器学习|模型).{0,20}鲁棒"]},
+    {"id":"zh-primitive","kind":"literal","pattern":"原语","category":"translationese","severity":"P3","message":"对一般读者可换成更具体的基本操作。","suggestions":["基本操作","基础能力","最小操作单元"],"context_note":"操作系统、并发、密码学和编程语言中是标准术语。","exempt_if_line_matches":["(?:操作系统|并发|同步|密码|编程语言|数据库).{0,20}原语","原语.{0,20}(?:操作|指令|支持)"]},
+    {"id":"zh-mental-model","kind":"literal","pattern":"心智模型","category":"translationese","severity":"P3","message":"面向普通读者时可以说明具体理解方式。","suggestions":["理解方式","用户如何理解它","对系统的认识"],"context_note":"认知科学和 UX 研究中是常用术语。","exempt_if_line_matches":["(?:认知|用户研究|UX|交互设计).{0,20}心智模型"]},
+    {"id":"zh-breadcrumb-metaphor","kind":"literal","pattern":"面包屑","category":"translationese","severity":"P3","message":"确认这里指 UI 导航还是不自然的“线索”比喻。","suggestions":["线索","踪迹","记录"],"context_note":"“面包屑导航”是通用 UI 术语，应保留。","exempt_if_line_matches":["面包屑(?:导航|组件|路径)"]},
+    {"id":"zh-cross-cutting","kind":"literal","pattern":"横切","category":"translationese","severity":"P3","message":"检查是否需要改为更具体的跨模块职责。","suggestions":["跨模块","贯穿各处","通用部分"],"context_note":"AOP 中的“横切关注点”是业内常用说法。","exempt_if_line_matches":["横切关注点|AOP"]},
+    {"id":"zh-approach-slang","kind":"regex","pattern":"切法|打法|硬货","category":"coined","severity":"P3","message":"可能把普通做法压缩成含义不清的行话。","suggestions":["角度","做法","实际有用的内容"],"context_note":"团队或行业确实这样说时可保留，不要机械替换。"},
+    {"id":"zh-theatrical-failure","kind":"regex","pattern":"理直气壮的谎|欢快的成功|一模一样的病|最容易的死法","category":"theatrical","severity":"P2","message":"戏剧化表达可能掩盖准确的故障现象。","suggestions":["直接说明报告成功但实际失败","写明同类问题或故障条件"]},
+    {"id":"zh-not-only","kind":"regex","pattern":"不仅(?:仅)?[^，。；]{0,24}(?:而是|更是|而且)","category":"syntax","severity":"P3","message":"检查是否真有递进或转折；AI 输出常用它制造虚假的强调。","suggestions":["直接说明主要事实","保留确有意义的递进关系"]},
+    {"id":"zh-rhetorical-question","kind":"regex","pattern":"(?:根子在哪|问题出在哪|为什么会这样|这意味着什么)[？?]","category":"syntax","severity":"P3","message":"自问自答可能只是制造节奏，没有增加信息。","suggestions":["直接陈述原因或结论"]},
+    {"id":"zh-shallow-analysis","kind":"regex","pattern":"(?:彰显|凸显|体现|反映|印证)了[^，。；]{0,28}(?:的|其)","category":"syntax","severity":"P2","message":"句尾抽象拔高可能没有提供新的分析。","suggestions":["删除拔高句","说明可以观察到的机制或后果"]},
+    {"id":"unsupported-absolute","kind":"regex","pattern":"完全杜绝|百分之百|零故障|无限扩展|绝对安全|永不出错","category":"evidence","severity":"P1","message":"绝对化承诺需要证据、边界和验证方法。","suggestions":["限定适用范围","改为可测量目标","提供证据"]},
+    {"id":"authorship-claim","kind":"regex","pattern":"(?:明显|肯定|显然)是\\s*AI(?:生成|写)的|(?:clearly|obviously|definitely) (?:written|generated) by ai","category":"evidence","severity":"P1","message":"文风不能证明 AI 作者身份；应审查可见的质量问题。","suggestions":["改为具体指出模板化、证据或可用性问题"]},
+    {"id":"template-placeholder","kind":"regex","pattern":"\\[(?:insert|todo|tbd|待补充|填写)[^\\]]*\\]|<placeholder>|\\{\\{[^}]+\\}\\}","category":"evidence","severity":"P1","message":"未处理的模板占位符会让产物无法直接交付。","suggestions":["补充真实内容","明确标成待确认问题","删除无用章节"]},
+    {"id":"en-generic-framing","kind":"regex","pattern":"\\b(?:in today['’]s (?:world|landscape)|it is (?:important|worth noting) that|seamless(?:ly)?|supercharge|empower(?:ing|s|ed)?|future[- ]proof)\\b","category":"filler","severity":"P2","message":"Generic English framing may delay the point or replace a concrete mechanism.","suggestions":["State the concrete change, consequence, or evidence"]}
+  ],
+  "document_rules": [
+    {"id":"zh-em-dash-overuse","pattern":"——","minimum_count":3,"category":"syntax","severity":"P3","message":"全文多次使用破折号，检查是否在机械制造停顿或强调。","suggestions":["能用句号或逗号时优先使用","保留确有插入或转折作用的破折号"]}
+  ]
+}
